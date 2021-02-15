@@ -1,39 +1,66 @@
+# check version
+git --version
+
+# configure git
+git config --list                           # has 3 additional arguments "--system" (system level) < "--global" (user level) < "--local" (repository level). '<' signifies precedence
+git config --global user.name "Amandeep Rathee"
+git config --global user.email arathee2@gmail.com
+git config --global core.editor emacs
+git config --global init.defaultBranch master
+git config --global <key>                   # get value
+git config --global <key> <value>           # set value
+git config --show-origin <key>              # see file where value is coming from
+
+# get help
+git <command-name> --help
+
 # initialize repository
 git init                                    # make parent directory a git repository
 git init <existing-directory-name>          # make specified directory a git repository
 git init <new-repository-name>              # create a new repository
 
-# clone existing repository
-git clone <URL/path>
-
-# remotes
-git remote [-v]                             # list remotes
-git remote add <remote-name> <URL/path>     # add remote
-git remote rm <remote-name>                 # remove remote
-
-# stage files
-git add <file-name>                         # add files to dtaging area
-git rm <file-name>                          # remove files from repository and add this change to staging area
+# clone repository
+git clone <repository-url>
 
 # check status of staged and unstaged files
 git status
 
-# commit
-git commit -m 'information about commit'
-git commit --ammend -m 'new message for same commit'
+# working directory to staging area
+git add <file/directory-name>               # add untracked or modified file/direcotry to staging area
+git rm <file/directory-name>                # remove file/directory from staging area and working directory
+git rm --cached <file/directory-name>       # remove file from staging area but not from working directory
 
-# pull
-git pull <remote-name> <branch-name>
+# staging area to local repository
+git commit -m 'information about commit'              # move changes from staging area to repository
+git commit --ammend -m 'new message for same commit'  # overwrite last commit (that has not been pushed); last commit will be not be shown in commit history
 
-# push
+# pull: download stuff from remote repository to local repository
+git fetch <remote-name> <branch-name>       # download from remote to local repository
+git pull <remote-name> <branch-name>        # download and merge from remote to local repository
+
+# push: upload stuff from local repository to remote repository
 git push <remote-name> <branch-name>
 
-# log - see commit history - reverse chronological order
-git log [optional file-name or directory-name]
-git log -3 <file-name>                      # look at latest 3 changes in a file
+# remotes
+git remote [-v]                             # list remotes
+git remote show <remote-name>               # show detailed information about a remote
+git remote rename <old-name> <new-name>     # rename a remote
+git remote add <remote-name> <url>          # add remote
+git remote rm <remote-name>                 # remove remote
 
-# difference
-git diff                                    # look at differences in repository
+# commit history
+git log
+git log -<n>                                # look at latest n commits
+git log --stat                              # display some stats about commits
+git log --pretty=oneline                    # pretty printing; other options are `short`, `full` and `fuller`
+git log --pretty=format:"%h - %an : %s".    # custom format; more info about identifiers here: https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History#pretty_format
+git log -S function_name                    # display commits that changed `function_name`; could use any arbitrary string insetad of `function_name`
+git log -- <file-name>                      # filter commit history based on file name; file name is the last option followed by `-- `
+git log --since=2.weeks                     # filter commits based on date; other options is --until
+
+# difference between working directory, staging area and repository
+git diff                                    # look at difference between unstaged and staged versions
+git diff --staged                           # look at difference between staged and committed versions
 git diff <file-name>                        # look at differences in a file
 git diff <directory-name>                   # look at differences in a folder
 git diff -r HEAD                            # look at differences between current version and last commit
@@ -41,6 +68,19 @@ git diff -r HEAD <file-name>
 git diff -r HEAD <directory-name>
 git diff <commit-reference-1>..<commit-reference-2>
 git diff <branch-1>..<branch-2>
+
+# tags
+git tag                                     # list tags; pass `--list` printing a list
+git tag <tag-name> [commit-id]              # create a tag with tag name (such as v0.2); by default latest commit is tagged unless a commit id mentioned
+git tag -a <tag-name> [commit id]           # create an annotated tag (a tag with detailed information)
+git push --tags                             # push tags to remote; tags get downloaded when someone does a `git pull`
+git tag -d <tag-name>                       # delete local tag
+git push --delete <tag-name>                # delete remote tag
+
+# aliasing
+git config --global alias.<alias> 'command'   # set alias to a git command
+git config --global alias.last 'log -1 HEAD'
+git config --global alias.<alias> '!command'  # use ! if `command` is not a git command (when it is an external command)
 
 # look at changes of a particular commit -- displays both git log and git diff outputs pertaining to that commit
 git show "commit-reference"
@@ -56,27 +96,18 @@ git show "commit-reference"
 # who changed what changes and when -- outputs commit hash, author, commit time, line number tampered with and contents changed in the line
 git annotate <file-name>
 
-# ignore files and directories -- create a ".gitignore" file in the root of the repository
-temp                                        # ignore any file or directory called temp (and, if it's a directory, anything inside it)
-*.pdf                                       # ignore all pdf files in the root of the repository
-./bin/*.py                                  # ignore all .py files in the bin folder
-
 # clean git repository
 git clean -n                                # get untracked files
 git clean -f                                # remove untracked files
 
-# configure git
-git config --list                           # has 3 additional arguments "--system", "--global", "--local". the right one takes precedence over left one.
-git config --global <field> <value>         # change setting, for example, git congif --global user.name "Amandeep Rathee"
-
 # undo changes
-	# unstage a file
-	git reset HEAD <file-name>
+	# discard changes in working directory
+	git restore <file-name/directory-name>
+	
+	# move file from staging area to working directory
+	git restore --staged <file-name>
 
-	# revert changes of an unstaged file or all files in a directory
-	git checkout -- <file-name/directory-name>
-
-	# revert back to a particular commit history
+	# revert back to a particular commit from history
 	git checkout <commit-reference> <file-name>
 
 # branching

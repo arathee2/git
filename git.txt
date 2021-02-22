@@ -34,11 +34,11 @@ git rm --cached <file/directory-name>       # remove file from staging area but 
 git commit -m 'information about commit'              # move changes from staging area to repository
 git commit --ammend -m 'new message for same commit'  # overwrite last commit (that has not been pushed); last commit will be not be shown in commit history
 
-# pull: download stuff from remote repository to local repository
+# pull: remote repository to local repository
 git fetch <remote-name> <branch-name>       # download from remote to local repository
 git pull <remote-name> <branch-name>        # download and merge from remote to local repository
 
-# push: upload stuff from local repository to remote repository
+# push: local repository to remote repository
 git push <remote-name> <branch-name>
 
 # remotes
@@ -57,6 +57,9 @@ git log --pretty=format:"%h - %an : %s".    # custom format; more info about ide
 git log -S function_name                    # display commits that changed `function_name`; could use any arbitrary string insetad of `function_name`
 git log -- <file-name>                      # filter commit history based on file name; file name is the last option followed by `-- `
 git log --since=2.weeks                     # filter commits based on date; other options is --until
+git log <branch-name>                       # see commit history of a different branch than the current
+git log --all                               # see commit history of all branches
+git log --oneline --decorate --graph --all  # see a graph of branches
 
 # difference between working directory, staging area and repository
 git diff                                    # look at difference between unstaged and staged versions
@@ -82,16 +85,37 @@ git config --global alias.<alias> 'command'   # set alias to a git command
 git config --global alias.last 'log -1 HEAD'
 git config --global alias.<alias> '!command'  # use ! if `command` is not a git command (when it is an external command)
 
+# local branching: https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell
+git branch <branch>                         # create a new branch
+git switch <branch>                         # switch to another branch
+git switch -c <branch>                      # create and switch in one command
+git switch -                                # switch to previous branch
+git merge <src-branch> <dst-branch>         # merge source rbanch into  destination branch; in case of conflict, merge = resolve manually --> stage --> commit; two types of merge: fast-forward and three-way merge
+git branch                                  # list all branches
+git branch -V                               # list all branches and their latest commit ID and messages
+git branch --merged                         # list branches that have been previously merged into the current branch
+git branch --merged <other-branch>          # list branches that have been previously merged into the other-branch
+git branch --no-merged                      # list branches that have NOT been previously merged into the current branch
+git branch --move <old-name> <new-name>     # rename branch locally; bad practice since collaborator won't know
+git branch -d <branch>                      # delete local branch (only allowed when changes are merged with some other branch so work is not lost; `-D` forces delete without merging changes)
+
+# remote branching: https://git-scm.com/book/en/v2/Git-Branching-Remote-Branches
+git remote show <remote>                    # see all remote references
+git branch -vv                              # see all local branches and their respective remote-tracking branches
+git fetch <remote>                          # download from remote to local; does NOT download copy of a branch that is in remote but not in local
+git checkout -b <branch> <remote>/<branch>  # download copy of branch from remote to local that is in remote but not in local yet -- a first time thing
+git push --set-upstream <remote> <branch>   # push local `branch` to `remote/branch` when local has `branch` but remote does not have it yet -- a first time thing
+git push <remote> <branch>                  # push local `branch` to remote `remote/branch` when both local and remote have the branch
+git branch -u <remote>/<branch>             # have current local branch track a different remote branch
+git push <remote> --delete <branch>         # delete remote branch
+
+# rebase: alternate to three-way merge -- https://git-scm.com/book/en/v2/Git-Branching-Rebasing
+git rebase <base> <branch>                  # rebase `branch` onto `base` = change parent of `branch` to `base`
+git switch <base>; git merge <branch>       # do a fast-forward merge so that `base` points to the same commit as `branch`
+git pull --rebase                           # DON'T rebase commits that have already been pushed publicly, and people may have based work on those commits; use this command if this happens to debug
+
 # look at changes of a particular commit -- displays both git log and git diff outputs pertaining to that commit
-git show "commit-reference"
-
-# referring commits
-	# absolute reference
-	"122795ac7c534a1053266a15f03013f61d85d189"
-
-	# relative reference
-	HEAD                                    # refer most recent commit
-	HEAD~2                                  # refer to the commit that is two commits before HEAD
+git show <commit-reference>                 # absolute (122795ac7c534a1053266a15f03013f61d85d189 or relative (HEAD~3)
 
 # who changed what changes and when -- outputs commit hash, author, commit time, line number tampered with and contents changed in the line
 git annotate <file-name>
@@ -101,34 +125,6 @@ git clean -n                                # get untracked files
 git clean -f                                # remove untracked files
 
 # undo changes
-	# discard changes in working directory
-	git restore <file-name/directory-name>
-	
-	# move file from staging area to working directory
-	git restore --staged <file-name>
-
-	# revert back to a particular commit from history
-	git checkout <commit-reference> <file-name>
-
-# branching
-	# list all branches
-	git branch -a
-
-	# create branch
-	git branch <branch-name>
-
-	# switch branch
-	git checkout <branch-name>
-
-	# create and switch branch
-	git checkout -b <branch-name>
-
-	# push branch to server after creating
-	git push -u <remote-name> <branch-name>
-	
-	# delete branch
-	git branch -d <branch-name>                    # deletes local branch
-	git push <remote-name> --delete <branch-name>  # deletes remote branch
-
-# merge
-git merge <source-branch-name> <destination-branch-name>
+git restore <file-name/directory-name>      # discard changes in working directory
+git restore --staged <file-name>            # move file from staging area to working directory
+git checkout <commit-reference> <file-name> # revert back to a particular commit from history
